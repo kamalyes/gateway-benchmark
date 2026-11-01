@@ -1,0 +1,14 @@
+# 编译出来的被测对象与驱动，202 MB 不进仓库
+# 跑 make bench 会重新构建它们
+#
+# [EN] The built subjects and driver are 202 MB and stay out of the repository; make bench
+# rebuilds them
+bin/
+
+# 基准的原始输出，报告由 results/*.json 生成，这份中间产物不需要入库
+# [EN] The raw benchmark output is an intermediate; the report is generated from results/*.json
+benchmark_output.txt
+
+# go test -o 产出的测试二进制
+# [EN] Test binaries from go test -o
+*.test

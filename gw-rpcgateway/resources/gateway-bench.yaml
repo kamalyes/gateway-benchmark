@@ -1,0 +1,39 @@
+name: "gateway-bench"
+
+grpc:
+  server:
+    enable: true
+    host: "127.0.0.1"
+    port: 9200
+
+# 键名是 http，不是 http-server
+# docs/QUICKSTART.md 的示例写的是 http-server，照它写会被静默忽略，
+# HTTP 退回默认的 0.0.0.0:8080，看起来像「端口没生效」
+# [EN] The key is http, not http-server; the QUICKSTART example uses the latter,
+# which is silently ignored and leaves HTTP on the default 0.0.0.0:8080
+http:
+  host: "127.0.0.1"
+  port: 8301
+
+# 数据库与缓存全关：跑分只测网关层，开着它们启动就会去连不存在的服务
+# [EN] Database and cache are off: the benchmark measures the gateway layer only,
+# and leaving them on makes startup dial services that are not there
+database:
+  enabled: false
+
+cache:
+  enabled: false
+
+# 关掉访问日志中间件
+# go-rpc-gateway 默认每请求写一行 INFO 访问日志，而对照组 go-zero 侧调了 logx.Disable()
+# 留着就是让一边付 stdout 的 I/O、另一边不付，比出来的是写日志的成本
+# 「两边都开日志」的那一组另外单独跑，见 REPORT.md
+#
+# [EN] The access-log middleware is off
+# go-rpc-gateway writes one INFO line per request by default while the go-zero side
+# calls logx.Disable(), so leaving it on charges one side for stdout I/O the other
+# never pays; the both-logging variant is measured separately, see REPORT.md
+middleware:
+  logging:
+    enabled: false
+    prefix: "[BENCH]"

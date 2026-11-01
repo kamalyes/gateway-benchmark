@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package bench;
+
+option go_package = "github.com/kamalyes/gateway-benchmark/proto;benchpb";
+
+// BenchService 两边网关共用的契约
+// 刻意只放一个一元方法：对比的是网关层开销，不是业务逻辑
+//
+// [EN] The contract shared by both gateways
+// Deliberately a single unary method: what is being compared is gateway overhead,
+// not business logic
+service BenchService {
+  // Echo 回显请求并附带一个固定大小的载荷
+  // [EN] Echo returns the request plus a fixed-size payload
+  rpc Echo(EchoRequest) returns (EchoResponse) {}
+}
+
+message EchoRequest {
+  string id = 1;
+  int32 seq = 2;
+  string text = 3;
+}
+
+message EchoResponse {
+  string id = 1;
+  int32 seq = 2;
+  string text = 3;
+  // items 让响应有一点结构，避免退化成「序列化一个字符串」
+  // [EN] items give the response some structure so it is not just one string
+  repeated Item items = 4;
+}
+
+message Item {
+  int64 key = 1;
+  string value = 2;
+}
