@@ -212,7 +212,7 @@ go-rpc-gateway 是我封装的,所以这一节我写得尽量直:
 
 ## 8. 环境
 
-go1.26.2 / darwin / arm64 / GOMAXPROCS=10，共 90 轮、18 组
+go1.26.2 / darwin / arm64 / GOMAXPROCS=10，驱动 builtin，共 90 轮、18 组
 
 被测版本见 `go.mod`
 

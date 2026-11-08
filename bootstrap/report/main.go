@@ -36,9 +36,14 @@ import (
 
 // run 与 driver 落盘的 JSON 一一对应
 type run struct {
-	Scheme     string  `json:"scheme"`
-	Shape      string  `json:"shape"`
-	Name       string  `json:"name"`
+	Scheme string `json:"scheme"`
+	Shape  string `json:"shape"`
+	Name   string `json:"name"`
+	// Driver 产生这一行的驱动 空值按 builtin 读：自建 driver 早于这个字段，
+	// 已入库的 results/*.json 里没有它
+	// [EN] Which driver produced this row; an empty value reads as builtin because the
+	// built-in driver predates the field and the results already in the repository lack it
+	Driver     string  `json:"driver"`
 	Conns      int     `json:"conns"`
 	Requests   int64   `json:"requests"`
 	Errors     int64   `json:"errors"`
@@ -359,8 +364,47 @@ func renderEnv(env run, groups map[string]*group, order []string) string {
 	for _, k := range order {
 		total += len(groups[k].runs)
 	}
-	return fmt.Sprintf("%s / %s / %s / GOMAXPROCS=%d，共 %d 轮、%d 组",
-		env.GoVersion, env.OS, env.Arch, env.GOMAXPROCS, total, len(order))
+
+	// 驱动必须出现在环境行里
+	//
+	// template.md 的散文讲的是自建驱动的方法论（预热不记样本、每 worker 一个 Transport），
+	// 而 stressdriver 用 go-stress 当引擎，口径与它不同（见 README 的对照表）。
+	// 报告里不标明驱动，一份 go-stress 跑出来的 REPORT.md 会原样套着那段散文，
+	// 读者没有任何线索知道数字换了来源 —— 这比数字本身错更难发现
+	//
+	// 同时列出多个驱动说明这批结果是混着来的：报告按 (形态, 方案, 并发) 取中位数，
+	// 混在一个 results 目录里的两个驱动会被平均成一行，那是无意义的数
+	//
+	// [EN] The driver belongs in the environment line. template.md's prose describes the
+	// built-in driver's methodology while stressdriver runs on go-stress with different
+	// conventions, and without naming the driver a go-stress-produced REPORT.md would carry
+	// that prose unchanged, with nothing to tell the reader the numbers came from elsewhere.
+	// Several drivers listed at once means the results were mixed: the report takes medians per
+	// (shape, scheme, conns), so two drivers in one results directory average into one
+	// meaningless row
+	seen := map[string]bool{}
+	for _, k := range order {
+		for _, r := range groups[k].runs {
+			name := r.Driver
+			if name == "" {
+				name = "builtin"
+			}
+			seen[name] = true
+		}
+	}
+	drivers := make([]string, 0, len(seen))
+	for name := range seen {
+		drivers = append(drivers, name)
+	}
+	sort.Strings(drivers)
+	mixed := ""
+	if len(drivers) > 1 {
+		mixed = "（⚠️ 多个驱动混在同一批结果里，中位数没有意义）"
+	}
+
+	return fmt.Sprintf("%s / %s / %s / GOMAXPROCS=%d，驱动 %s%s，共 %d 轮、%d 组",
+		env.GoVersion, env.OS, env.Arch, env.GOMAXPROCS,
+		strings.Join(drivers, " + "), mixed, total, len(order))
 }
 
 // us 微秒按量级选单位，避免报告里出现 46085.5us 这种读不出量级的数
