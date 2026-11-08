@@ -19,7 +19,8 @@ import (
 	"github.com/kamalyes/gateway-benchmark/core"
 	benchpb "github.com/kamalyes/gateway-benchmark/proto"
 	goconfig "github.com/kamalyes/go-config"
-	"github.com/kamalyes/go-logger"
+	gwconfig "github.com/kamalyes/go-rpc-gateway/config"
+	tblogger "github.com/kamalyes/go-toolbox/pkg/logger"
 	// 包 gateway 就在模块根，不是 go-rpc-gateway/gateway 子目录
 	// docs/QUICKSTART.md 里所有示例写的都是后者，按文档抄会报 does not contain package
 	// [EN] Package gateway sits at the module root, not under a gateway/ subdirectory
@@ -45,7 +46,7 @@ func main() {
 
 	gw, err := gateway.NewGateway().
 		WithSearchPath("gw-rpcgateway/resources").
-		WithEnvironment(goconfig.GetEnvironment()).
+		WithEnvironment(gwconfig.EnvironmentType(goconfig.GetEnvironment())).
 		WithPrefix("gateway-bench").
 		Silent().
 		Build()
@@ -71,7 +72,7 @@ func main() {
 	// The go-zero side calls logx.Disable(), also a level gate rather than removing
 	// the middleware, so both sides pay the same kind of cost
 	if gwglobal.LOGGER != nil {
-		gwglobal.LOGGER.SetLevel(logger.ERROR)
+		gwglobal.LOGGER.SetLevel(tblogger.ERROR)
 	}
 
 	impl := &svc{}

@@ -104,38 +104,38 @@ message、出去再编回 JSON,这一段走的是逐字段反射,比手写结构
 
 | 并发 | 方案 | 轮数 | RPS(中位) | RPS极差 | p50 | p90 | p99 | p99.9 | 响应体 | 错误 |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 8 | go-rpc-gateway | 5 | 60703 | 4.2% | 107µs | 223µs | 443µs | 973µs | 297 B | 0 |
-| 8 | go-zero | 5 | 36001 | 3.1% | 207µs | 300µs | 505µs | 941µs | 255 B | 0 |
-| 32 | go-rpc-gateway | 5 | 84945 | 1.7% | 272µs | 764µs | 1.77ms | 3.47ms | 297 B | 0 |
-| 32 | go-zero | 5 | 61844 | 5.0% | 470µs | 772µs | 1.39ms | 3.19ms | 255 B | 0 |
-| 64 | go-rpc-gateway | 5 | 86189 | 2.1% | 420µs | 1.75ms | 4.65ms | 7.69ms | 297 B | 0 |
-| 64 | go-zero | 5 | 67932 | 6.0% | 863µs | 1.43ms | 2.42ms | 5.30ms | 255 B | 0 |
+| 8 | go-rpc-gateway | 3 | 47289 | 4.1% | 118µs | 287µs | 850µs | 3.36ms | 297 B | 0 |
+| 8 | go-zero | 3 | 33067 | 8.4% | 218µs | 339µs | 609µs | 2.17ms | 255 B | 0 |
+| 32 | go-rpc-gateway | 3 | 69696 | 72.9% | 302µs | 927µs | 2.53ms | 6.51ms | 297 B | 0 |
+| 32 | go-zero | 3 | 57667 | 17.3% | 473µs | 837µs | 1.61ms | 4.66ms | 255 B | 0 |
+| 64 | go-rpc-gateway | 3 | 85813 | 6.2% | 419µs | 1.78ms | 4.67ms | 8.57ms | 297 B | 0 |
+| 64 | go-zero | 3 | 52425 | 10.8% | 1.04ms | 1.88ms | 4.13ms | 13.44ms | 255 B | 0 |
 
 
 | 并发 | 按 RPS 中位排序 | 相对 net/http 地板 | 相对裸 grpc-gateway mux |
 |---:|---|---|---|
-| 8 | go-rpc-gateway 60.7k > go-zero 36.0k | go-rpc-gateway 0.67x，go-zero 0.39x | go-rpc-gateway 0.97x，go-zero 0.58x |
-| 32 | go-rpc-gateway 84.9k > go-zero 61.8k | go-rpc-gateway 0.60x，go-zero 0.44x | go-rpc-gateway 1.04x，go-zero 0.76x |
-| 64 | go-rpc-gateway 86.2k > go-zero 67.9k | go-rpc-gateway 0.63x，go-zero 0.49x | go-rpc-gateway 1.02x，go-zero 0.80x |
+| 8 | go-rpc-gateway 47.3k > go-zero 33.1k | go-rpc-gateway 0.51x，go-zero 0.35x | go-rpc-gateway 0.90x，go-zero 0.63x |
+| 32 | go-rpc-gateway 69.7k > go-zero 57.7k | go-rpc-gateway 0.48x，go-zero 0.40x | go-rpc-gateway 1.04x，go-zero 0.86x |
+| 64 | go-rpc-gateway 85.8k > go-zero 52.4k | go-rpc-gateway 0.58x，go-zero 0.36x | go-rpc-gateway 1.21x，go-zero 0.74x |
 
 
 ### 4.2 形态 A:单进程直出
 
 | 并发 | 方案 | 轮数 | RPS(中位) | RPS极差 | p50 | p90 | p99 | p99.9 | 响应体 | 错误 |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 8 | go-rpc-gateway | 5 | 61868 | 4.0% | 105µs | 218µs | 424µs | 910µs | 297 B | 0 |
-| 8 | go-zero | 5 | 36382 | 2.9% | 206µs | 296µs | 492µs | 892µs | 255 B | 0 |
-| 32 | go-rpc-gateway | 5 | 87573 | 1.3% | 266µs | 746µs | 1.68ms | 3.10ms | 297 B | 0 |
-| 32 | go-zero | 5 | 62775 | 6.0% | 457µs | 750µs | 1.36ms | 2.78ms | 255 B | 0 |
-| 64 | go-rpc-gateway | 5 | 88526 | 2.3% | 414µs | 1.70ms | 4.48ms | 7.29ms | 297 B | 0 |
-| 64 | go-zero | 5 | 69260 | 8.0% | 850µs | 1.39ms | 2.36ms | 5.05ms | 255 B | 0 |
+| 8 | go-rpc-gateway | 3 | 51903 | 21.9% | 113µs | 259µs | 634µs | 2.54ms | 297 B | 0 |
+| 8 | go-zero | 3 | 35208 | 3.9% | 208µs | 310µs | 542µs | 1.46ms | 255 B | 0 |
+| 32 | go-rpc-gateway | 3 | 83046 | 7.9% | 277µs | 783µs | 1.79ms | 3.58ms | 297 B | 0 |
+| 32 | go-zero | 3 | 63483 | 32.6% | 449µs | 748µs | 1.37ms | 3.60ms | 255 B | 0 |
+| 64 | go-rpc-gateway | 3 | 77328 | 9.7% | 458µs | 1.95ms | 5.04ms | 12.23ms | 297 B | 0 |
+| 64 | go-zero | 3 | 66334 | 15.6% | 856µs | 1.48ms | 2.65ms | 8.50ms | 255 B | 0 |
 
 
 | 并发 | 按 RPS 中位排序 | 相对 net/http 地板 | 相对裸 grpc-gateway mux |
 |---:|---|---|---|
-| 8 | go-rpc-gateway 61.9k > go-zero 36.4k | go-rpc-gateway 0.68x，go-zero 0.40x | go-rpc-gateway 0.99x，go-zero 0.58x |
-| 32 | go-rpc-gateway 87.6k > go-zero 62.8k | go-rpc-gateway 0.62x，go-zero 0.44x | go-rpc-gateway 1.08x，go-zero 0.77x |
-| 64 | go-rpc-gateway 88.5k > go-zero 69.3k | go-rpc-gateway 0.64x，go-zero 0.50x | go-rpc-gateway 1.05x，go-zero 0.82x |
+| 8 | go-rpc-gateway 51.9k > go-zero 35.2k | go-rpc-gateway 0.56x，go-zero 0.38x | go-rpc-gateway 0.98x，go-zero 0.67x |
+| 32 | go-rpc-gateway 83.0k > go-zero 63.5k | go-rpc-gateway 0.57x，go-zero 0.44x | go-rpc-gateway 1.24x，go-zero 0.95x |
+| 64 | go-rpc-gateway 77.3k > go-zero 66.3k | go-rpc-gateway 0.53x，go-zero 0.45x | go-rpc-gateway 1.09x，go-zero 0.93x |
 
 
 形态 A 把「一跳内部 gRPC」去掉了,我留它只为一个用途:拿 A 和 B 的差额把那一跳网络
@@ -146,19 +146,19 @@ message、出去再编回 JSON,这一段走的是逐字段反射,比手写结构
 
 | 并发 | 方案 | 轮数 | RPS(中位) | RPS极差 | p50 | p90 | p99 | p99.9 | 响应体 | 错误 |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 8 | bare-grpc-gateway | 5 | 62555 | 31.3% | 100µs | 217µs | 438µs | 1.30ms | 279 B | 0 |
-| 8 | net-http-json | 5 | 91198 | 1.4% | 79µs | 126µs | 254µs | 482µs | 256 B | 0 |
-| 32 | bare-grpc-gateway | 5 | 81337 | 3.5% | 262µs | 912µs | 1.70ms | 2.68ms | 279 B | 0 |
-| 32 | net-http-json | 5 | 141570 | 3.1% | 180µs | 384µs | 1.00ms | 2.22ms | 256 B | 0 |
-| 64 | bare-grpc-gateway | 5 | 84505 | 1.3% | 312µs | 2.11ms | 4.31ms | 6.81ms | 279 B | 0 |
-| 64 | net-http-json | 5 | 137635 | 2.5% | 331µs | 1.02ms | 2.01ms | 3.69ms | 256 B | 0 |
+| 8 | bare-grpc-gateway | 3 | 52805 | 121.0% | 109µs | 248µs | 645µs | 3.37ms | 279 B | 0 |
+| 8 | net-http-json | 3 | 93428 | 5.0% | 77µs | 121µs | 240µs | 447µs | 256 B | 0 |
+| 32 | bare-grpc-gateway | 3 | 66965 | 77.9% | 304µs | 1.10ms | 2.25ms | 6.87ms | 279 B | 0 |
+| 32 | net-http-json | 3 | 145309 | 0.9% | 179µs | 370µs | 934µs | 1.91ms | 256 B | 0 |
+| 64 | bare-grpc-gateway | 3 | 71081 | 13.2% | 377µs | 2.42ms | 5.27ms | 10.66ms | 279 B | 0 |
+| 64 | net-http-json | 3 | 147046 | 1.5% | 316µs | 961µs | 1.80ms | 2.88ms | 256 B | 0 |
 
 
 | 并发 | 按 RPS 中位排序 | 相对 net/http 地板 | 相对裸 grpc-gateway mux |
 |---:|---|---|---|
-| 8 | net-http-json 91.2k > bare-grpc-gateway 62.6k | net-http-json 1.00x，bare-grpc-gateway 0.69x | net-http-json 1.46x，bare-grpc-gateway 1.00x |
-| 32 | net-http-json 141.6k > bare-grpc-gateway 81.3k | net-http-json 1.00x，bare-grpc-gateway 0.57x | net-http-json 1.74x，bare-grpc-gateway 1.00x |
-| 64 | net-http-json 137.6k > bare-grpc-gateway 84.5k | net-http-json 1.00x，bare-grpc-gateway 0.61x | net-http-json 1.63x，bare-grpc-gateway 1.00x |
+| 8 | net-http-json 93.4k > bare-grpc-gateway 52.8k | net-http-json 1.00x，bare-grpc-gateway 0.57x | net-http-json 1.77x，bare-grpc-gateway 1.00x |
+| 32 | net-http-json 145.3k > bare-grpc-gateway 67.0k | net-http-json 1.00x，bare-grpc-gateway 0.46x | net-http-json 2.17x，bare-grpc-gateway 1.00x |
+| 64 | net-http-json 147.0k > bare-grpc-gateway 71.1k | net-http-json 1.00x，bare-grpc-gateway 0.48x | net-http-json 2.07x，bare-grpc-gateway 1.00x |
 
 
 ## 5. go-rpc-gateway 在这份数据里吃亏的地方
@@ -212,7 +212,7 @@ go-rpc-gateway 是我封装的,所以这一节我写得尽量直:
 
 ## 8. 环境
 
-go1.26.2 / darwin / arm64 / GOMAXPROCS=10，驱动 builtin，共 90 轮、18 组
+go1.26.2 / darwin / arm64 / GOMAXPROCS=10，驱动 builtin，共 54 轮、18 组
 
 被测版本见 `go.mod`
 
