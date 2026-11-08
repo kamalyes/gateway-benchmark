@@ -24,10 +24,31 @@ CONNS="${CONNS:-8 32 64}"
 BACKEND_ADDR=127.0.0.1:9100
 LOGDIR="${LOGDIR:-/tmp/gateway-benchmark-logs}"
 
-mkdir -p results bin "$LOGDIR"
-rm -f results/*.json
+# DRIVER 选压测驱动：driver（自建）或 stressdriver（go-stress 引擎）
+#
+# 为什么要两个驱动：压测里最难自证的是「这个数字是被测对象的，不是驱动自己的」。
+# 驱动的连接复用策略、worker 模型、计时点都会直接改变结论，而这些错误不报错，
+# 只会让数字偏向某一侧 两个独立实现跑同一档，数字一致才说明测的是网关
+#
+# RESULTS_DIR 必须跟着 DRIVER 一起换 ——
+# 报告按 (形态, 方案, 并发) 分组取中位数，两个驱动的结果混在同一个目录里
+# 会被悄悄平均成一行，那比没测更糟
+#
+# [EN] DRIVER picks the load driver: the built-in one or the go-stress engine. Two independent
+# implementations are kept because the hardest thing to establish in a load test is that the
+# number belongs to the subject rather than to the driver: connection reuse, the worker model
+# and the timing points all change the conclusion without raising any error. RESULTS_DIR must
+# change along with DRIVER -- the report groups by (shape, scheme, conns) and takes the median,
+# so two drivers' results in one directory are silently averaged into one row, which is worse
+# than not measuring
+DRIVER="${DRIVER:-driver}"
+RESULTS_DIR="${RESULTS_DIR:-results}"
+REPORT_OUT="${REPORT_OUT:-REPORT.md}"
 
-for t in backend gw-zero gw-rpcgateway baseline driver; do
+mkdir -p "$RESULTS_DIR" bin "$LOGDIR"
+rm -f "$RESULTS_DIR"/*.json
+
+for t in backend gw-zero gw-rpcgateway baseline driver stressdriver; do
   go build -o "bin/$t" "./$t"
 done
 go build -o bin/report ./bootstrap/report
@@ -65,11 +86,11 @@ measure() {
   local shape="$1" scheme="$2" port="$3" tag="$4" c r
   for c in $CONNS; do
     for r in $(seq 1 "$ROUNDS"); do
-      ./bin/driver -shape "$shape" -scheme "$scheme" \
+      "./bin/$DRIVER" -shape "$shape" -scheme "$scheme" \
         -name "$shape/$scheme/c$c/r$r" \
         -url "http://127.0.0.1:$port/bench.BenchService/Echo" \
         -conns "$c" -duration "$DURATION" -warmup "$WARMUP" \
-        -out "results/$shape-$tag-c$c-r$r.json"
+        -out "$RESULTS_DIR/$shape-$tag-c$c-r$r.json"
     done
   done
 }
@@ -106,4 +127,4 @@ wait_ready 8402 && measure baseline bare-grpc-gateway 8402 gwmux
 
 stop_all
 echo "=== 生成报告 ==="
-./bin/report
+./bin/report -results "$RESULTS_DIR" -out "$REPORT_OUT"
